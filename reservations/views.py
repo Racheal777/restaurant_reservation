@@ -29,7 +29,7 @@ class ReservationCreateView(APIView):
             except Exception as e:
                 logger.error(f"Error creating reservation: {str(e)}")
                 return Response({"error": "Internal server error"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-        
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 # Create your views here.
 

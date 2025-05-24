@@ -1,27 +1,28 @@
 
 from .models import Restaurant, OpeningHour, Table
 from django.db import transaction
+from django.shortcuts import get_object_or_404
 
 class RestaurantRepository:
-    
     
     @staticmethod
     def get_all_restaurants():
         """
         Retrieve all restaurants  with related data.
         """
-        return Restaurant.objects.select_related('owner').prefetch_related('tables', 'opening_hours').only(
-            'id', 'name', 'address', 'owner__id', 'owner__username'
-        ).all()
+        return Restaurant.objects.select_related('owner')
+        
+        
     
     @staticmethod
     def get_restaurant_by_id(restaurant_id):
         """
         Retrieve a restaurant by its ID .
         """
-        return Restaurant.objects.select_related('owner').prefetch_related('tables', 'opening_hours').only(
-            'id', 'name', 'address', 'owner__id', 'owner__username'
-        ).get(id=restaurant_id)
+        
+        return Restaurant.objects.filter(id=restaurant_id).select_related('owner').first()
+        
+        
         
     @staticmethod
     def create_restaurant(serializer, user):
@@ -45,14 +46,18 @@ class RestaurantRepository:
         Update a restaurant's details.
         """
         with transaction.atomic():
-            restaurant = Restaurant.objects.filter(id=restaurant_id).first()
-            if not restaurant:
-                return None
+            restaurant = get_object_or_404(Restaurant, id=restaurant_id, owner=owner)
+            editable_fields = {f.name for f in Restaurant._meta.fields if f.name not in ['id', 'owner']}
+            for field, value in data.items():
+                if field in editable_fields:
+                    setattr(restaurant, field, value)
+            restaurant.save()
+            return restaurant
+           
             
             
             
           
-    
     
     @staticmethod
     def delete(instance):

@@ -5,6 +5,7 @@ from rest_framework.response import Response
 from .repository import RestaurantRepository
 from .serializers import RestaurantSerializer, OpeningHourSerializer, TableSerializer
 import logging
+import traceback
 # Create your views here.
 
 logger = logging.getLogger(__name__)
@@ -78,12 +79,18 @@ class RestaurantDetailView(APIView):
         Update a specific restaurant by ID.
         """
         restaurant = self.get_object(pk, request.user)
+        logger.info(f"Updating restaurant with ID {pk} by user {request.user.username}")
         if not restaurant:
+            logger.error(f"Restaurant with ID {pk} not found or user does not have permission.")
             return Response({'detail': 'Restaurant not found.'}, status=status.HTTP_404_NOT_FOUND)
         # Validate and update the restaurant data
         serializer = RestaurantSerializer(restaurant, data=request.data)
+        logger.info(f"Serializer data: {serializer}")
         if serializer.is_valid():
-            restaurant = RestaurantRepository.update_restaurant(pk, serializer.validated_data)
+            restaurant = RestaurantRepository.update_restaurant(pk, request.user, serializer.validated_data)
+            logger.info(f"Restaurant with ID {pk} updated successfully.")
+        
+        logger.error(f"Serializer errors: {serializer.errors} {traceback.print_exc()} \n")
            
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 

@@ -42,3 +42,24 @@ class RestaurantSerializer(serializers.ModelSerializer):
                 Table.objects.create(restaurant=restaurant, **table_data)
                 
             return restaurant 
+        
+        
+    def update(self, instance, validated_data):
+        opening_hours_data = validated_data.pop('opening_hours', None)
+        tables_data = validated_data.pop('tables', None)
+        
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+        instance.save()
+        
+        if opening_hours_data is not None:
+            instance.opening_hours.all().delete()
+            for hour_data in opening_hours_data:
+                OpeningHour.objects.create(restaurant=instance, **hour_data)
+                
+        if tables_data is not None:
+            instance.tables.all().delete()
+            for table_data in tables_data:
+                Table.objects.create(restaurant=instance, **table_data)
+                
+        return instance

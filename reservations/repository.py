@@ -9,7 +9,7 @@ from restaurants.models import Table
 class ReservationRepository:
     
     @staticmethod
-    def is_table_available(restaurant, reservation_time, duration, party_size, exclude_reservation_id=None):
+    def is_table_available(restaurant, reservation_time, duration, number_of_guests, exclude_reservation_id=None):
         """
         Check if a table is available for a given time and duration.
         """
@@ -17,10 +17,10 @@ class ReservationRepository:
         overlapping = Reservation.objects.filter(
             restaurant=restaurant,
             canceled=False,
-            reservation_time_lt=end_time,
+            reservation_time=end_time,
         ).exclude(id=exclude_reservation_id)
         
-        tables = Table.objects.filter(restaurant=restaurant, capacity_gte=party_size).order_by('capacity')
+        tables = Table.objects.filter(restaurant=restaurant, capacity=number_of_guests).order_by('capacity')
         
         for table in tables:
            has_conflict = overlapping.filter(table=table).exists()
@@ -47,8 +47,8 @@ class ReservationRepository:
                 restaurant=restaurant,
                 table=table,
                 reservation_time=reservation_time,
-                number_of_people=number_of_guests,
-                durration=duration,
+                number_of_guests=number_of_guests,
+                duration=duration,
                 special_requests=data.get('special_requests', '')
             )
             return reservation
