@@ -13,7 +13,7 @@ class TableSerializer(serializers.ModelSerializer):
 class OpeningHourSerializer(serializers.ModelSerializer):
     class Meta:
         model = OpeningHour
-        fields = [ 'day', 'open_time', 'close_time', 'is_closed']
+        fields = [ 'day', 'open_time', 'close_time']
         read_only_fields = ['id', 'restaurant']
     
     def validate(self, data):
@@ -23,12 +23,14 @@ class OpeningHourSerializer(serializers.ModelSerializer):
     
     
 class RestaurantSerializer(serializers.ModelSerializer):
+    opening_hours = OpeningHourSerializer(many=True)
+    tables = TableSerializer(many=True)
     class Meta:
         model = Restaurant
-        fields = ['id', 'name', 'address', 'phone_number', 'owner', 'created_at']
+        fields = ['id', 'name', 'address', 'phone_number', 'owner', 'created_at', 'opening_hours', 'tables']
         read_only_fields = ['id', 'owner', 'created_at']
         
-        def create(self, validated_data):
+    def create(self, validated_data):
             opening_hours_data = validated_data.pop('opening_hours')
             tables_data = validated_data.pop('tables')
             restaurant = Restaurant.objects.create(**validated_data)

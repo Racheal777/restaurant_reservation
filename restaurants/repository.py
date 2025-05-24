@@ -1,5 +1,5 @@
 
-from .models import Restaurant
+from .models import Restaurant, OpeningHour, Table
 from django.db import transaction
 
 class RestaurantRepository:
@@ -19,9 +19,18 @@ class RestaurantRepository:
         return Restaurant.objects.prefetch_related('tables', 'opening_hours').get(id=restaurant_id)
     
     @staticmethod
-    def create_restaurant(data, owner):
-        serializer = data
-        restaurant = serializer.save(owner=owner)
+    def create_restaurant(serializer, user):
+        validate_data = serializer.validated_data
+        
+        opening_hours_data = validate_data.pop('opening_hours', [])
+        tables_data = validate_data.pop('tables', [])
+        restaurant = Restaurant.objects.create(owner=user, **validate_data)
+        
+        for hour_data in opening_hours_data:
+            OpeningHour.objects.create(restaurant=restaurant, **hour_data)
+            
+        for table_data in tables_data:
+            Table.objects.create(restaurant=restaurant, **table_data)
         return restaurant
        
        
