@@ -4,7 +4,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from .repository import RestaurantRepository
 from .serializers import RestaurantSerializer, OpeningHourSerializer, TableSerializer
-
+import logging
 # Create your views here.
 
 logger = logging.getLogger(__name__)
@@ -14,7 +14,7 @@ class IsOwnerUser(permissions.BasePermission):
     Custom permission to only allow owners to access certain views.
     """
     def has_permission(self, request, view):
-        return request.user and request.user.role == 'owner'
+        return request.user and request.user.role == 'OWNER'
 
 class RestaurantListView(APIView):
     permission_classes = [permissions.IsAuthenticated, IsOwnerUser]
@@ -54,7 +54,7 @@ class RestaurantDetailView(APIView):
            
             restaurant = RestaurantRepository.get_restaurant_by_id(pk)
             if restaurant.owner != user:
-                raise PermissionError("You do not have permission to access this restaurant.")
+                raise PermissionError('You do not have permission to access this restaurant.')
             return restaurant
         except Exception as e:
             logger.error(f"Error retrieving restaurant with ID {pk}: {str(e)}")
@@ -67,7 +67,7 @@ class RestaurantDetailView(APIView):
         """
         restaurant = self.get_object(pk, request.user)
         if not restaurant:
-            return Response({"detail": "Restaurant not found."}, status=status.HTTP_404_NOT_FOUND)
+            return Response({'detail': 'Restaurant not found.'}, status=status.HTTP_404_NOT_FOUND)
         serializer = RestaurantSerializer(restaurant)
         return Response(serializer.data, status=status.HTTP_200_OK)
        
@@ -79,7 +79,7 @@ class RestaurantDetailView(APIView):
         """
         restaurant = self.get_object(pk, request.user)
         if not restaurant:
-            return Response({"detail": "Restaurant not found."}, status=status.HTTP_404_NOT_FOUND)
+            return Response({'detail': 'Restaurant not found.'}, status=status.HTTP_404_NOT_FOUND)
         # Validate and update the restaurant data
         serializer = RestaurantSerializer(restaurant, data=request.data)
         if serializer.is_valid():
@@ -96,7 +96,7 @@ class RestaurantDetailView(APIView):
       
         restaurant = self.get_object(restaurant_id, request.user)
         if not restaurant:
-            return Response({"detail": "Restaurant not found."}, status=status.HTTP_404_NOT_FOUND)
+            return Response({'detail': 'Restaurant not found.'}, status=status.HTTP_404_NOT_FOUND)
         RestaurantRepository.delete(restaurant)
         return Response({"detail": "Deleted successfully."},status=status.HTTP_204_NO_CONTENT)
        

@@ -6,7 +6,7 @@ class Restaurant(models.Model):
     name = models.CharField(max_length=100)
     address = models.CharField(max_length=255)
     phone_number = models.CharField(max_length=15, blank=True, null=True)
-    owner = models.ForeignKey(settings.AUTH.USER_MODEL, on_delete=models.CASCADE, related_name='restaurants')
+    owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='restaurants')
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
