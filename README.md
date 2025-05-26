@@ -49,7 +49,7 @@ A Django REST Framework-based API that allows restaurant owners to manage their 
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/yourusername/restaurant-reservation-api.git
+git clone https://github.com/Racheal777/restaurant_reservation.git
 cd restaurant-reservation-api
 ```
 
